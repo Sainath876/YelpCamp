@@ -1,7 +1,11 @@
 const express = require('express');
 const app = express();
 const path = require('path');
+const {
+    campgroundSchema
+} = require('./schemas.js');
 const catchAsync = require('./utils/catchAsync');
+const ExpressError = require('./utils/ExpressError');
 const mongoose = require('mongoose');
 const methodOverride = require('method-override');
 const ejsMate = require('ejs-mate');
@@ -36,6 +40,18 @@ app.use(urlencoded({
     extended: true
 }));
 
+const validateCamp = (req, res, next) => {
+    const {
+        error
+    } = campgroundSchema.validate(req.body);
+    if (error) {
+        const msg = error.details.map(el => el.message).join(",");
+        throw new ExpressError(msg, 400);
+    } else {
+        next();
+    }
+}
+
 app.get('/', (req, res) => {
     res.render('home');
 })
@@ -58,13 +74,13 @@ app.get('/campgrounds/:id/edit', catchAsync(async (req, res, next) => {
     });
 }))
 
-app.post('/campgrounds', catchAsync(async (req, res) => {
+app.post('/campgrounds', validateCamp, catchAsync(async (req, res) => {
     const campground = await new Campground(req.body.campground);
     await campground.save();
     res.redirect('/campgrounds');
 }))
 
-app.put('/campgrounds/:id', catchAsync(async (req, res, next) => {
+app.put('/campgrounds/:id', validateCamp, catchAsync(async (req, res, next) => {
     const {
         id
     } = req.params;
@@ -89,10 +105,18 @@ app.get('/campgrounds/:id', catchAsync(async (req, res, next) => {
     });
 }));
 
+app.all('*', (req, res, next) => {
+    next(new ExpressError('Page not found', 404));
+})
+
 app.use((err, req, res, next) => {
-    console.log("Unable to load image from the given Image URL");
-    res.send("Oh Boy");
-    next();
+    const {
+        statusCode = 500
+    } = err;
+    if (!err.message) err.message = "Something went wrong";
+    res.render('error', {
+        err
+    });
 })
 
 app.listen(3000, () => {
