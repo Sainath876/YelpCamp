@@ -32,6 +32,10 @@ router.get('/new', (req, res) => {
 
 router.get('/:id/edit', catchAsync(async (req, res, next) => {
     const campground = await Campground.findById(req.params.id);
+    if (!campground) {
+        req.flash('error', 'There is no such Campground');
+        res.redirect('/campgrounds');
+    }
     res.render('campground/edit', {
         campground
     });
