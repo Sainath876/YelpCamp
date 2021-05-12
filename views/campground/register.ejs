@@ -1,0 +1,28 @@
+<% layout('layouts/boilerplate') -%>
+
+<h2 class="mt-3">Register to YelpCamp!</h2>
+
+<form action="/register" method="POST" class="validation-needed mt-4" novalidate>
+    <div class="mt-3">
+        <label class="label" for="username">Enter username: </label>
+        <input class="form-control" type="username" id="username" name="username" required>
+        <div class="valid-feedback">
+            Looks good!
+        </div>
+    </div>
+    <div class="mt-3">
+        <label class="label" for="email">Enter Email: </label>
+        <input class="form-control" type="email" id="email" name="email" required>
+        <div class="valid-feedback">
+            Looks good!
+        </div>
+    </div>
+    <div class="mt-3">
+        <label class="label" for="password">Enter password: </label>
+        <input class="form-control" type="password" id="password" name="password" required>
+        <div class="valid-feedback">
+            Looks good!
+        </div>
+    </div>
+    <button class="btn btn-success mt-3">Register!</button>
+</form>
