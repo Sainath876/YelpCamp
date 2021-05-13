@@ -6,6 +6,9 @@ const {
 const catchAsync = require('../utils/catchAsync');
 const ExpressError = require('../utils/ExpressError');
 const Campground = require('../models/campground');
+const {
+    isLoggedIn
+} = require('../middleware');
 
 const validateCamp = (req, res, next) => {
     const {
@@ -26,11 +29,11 @@ router.get('/', catchAsync(async (req, res) => {
     });
 }))
 
-router.get('/new', (req, res) => {
+router.get('/new', isLoggedIn, (req, res) => {
     res.render('campground/new');
 })
 
-router.get('/:id/edit', catchAsync(async (req, res, next) => {
+router.get('/:id/edit', isLoggedIn, catchAsync(async (req, res, next) => {
     const campground = await Campground.findById(req.params.id);
     if (!campground) {
         req.flash('error', 'There is no such Campground');
@@ -41,14 +44,14 @@ router.get('/:id/edit', catchAsync(async (req, res, next) => {
     });
 }))
 
-router.post('/', validateCamp, catchAsync(async (req, res) => {
+router.post('/', isLoggedIn, validateCamp, catchAsync(async (req, res) => {
     const campground = await new Campground(req.body.campground);
     await campground.save();
     req.flash('success', 'Successfully made a new Camp');
     res.redirect('/campgrounds');
 }))
 
-router.put('/:id', validateCamp, catchAsync(async (req, res, next) => {
+router.put('/:id', isLoggedIn, validateCamp, catchAsync(async (req, res, next) => {
     const {
         id
     } = req.params;
@@ -59,7 +62,7 @@ router.put('/:id', validateCamp, catchAsync(async (req, res, next) => {
     res.redirect(`/campgrounds/${id}`);
 }))
 
-router.delete('/:id', catchAsync(async (req, res) => {
+router.delete('/:id', isLoggedIn, catchAsync(async (req, res) => {
     const {
         id
     } = req.params;
