@@ -9,29 +9,24 @@ const {
     reviewSchema
 } = require('../schemas.js');
 const Review = require('../models/review');
+const {
+    validateReview,
+    isLoggedIn,
+    isReviewUploader
+} = require('../middleware');
 
-const validateReview = (req, res, next) => {
-    const {
-        error
-    } = reviewSchema.validate(req.body);
-    if (error) {
-        const msg = error.details.map(el => el.message).join(",");
-        throw new ExpressError(msg, 400);
-    } else {
-        next();
-    }
-}
 
-router.post('/', validateReview, catchAsync(async (req, res) => {
+router.post('/', validateReview, isLoggedIn, catchAsync(async (req, res) => {
     const campground = await Campground.findById(req.params.id);
     const review = await new Review(req.body.review);
+    review.uploader = req.user._id;
     campground.reviews.push(review);
     await review.save();
     await campground.save();
     res.redirect(`/campgrounds/${campground._id}`)
 }))
 
-router.delete('/:reviewId', catchAsync(async (req, res) => {
+router.delete('/:reviewId', isLoggedIn, isReviewUploader, catchAsync(async (req, res) => {
     const {
         id,
         reviewId

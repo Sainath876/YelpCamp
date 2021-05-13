@@ -1,26 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const {
-    campgroundSchema
-} = require('../schemas.js');
+
 const catchAsync = require('../utils/catchAsync');
-const ExpressError = require('../utils/ExpressError');
 const Campground = require('../models/campground');
 const {
-    isLoggedIn
+    isLoggedIn,
+    validateCamp,
+    isUploader
 } = require('../middleware');
 
-const validateCamp = (req, res, next) => {
-    const {
-        error
-    } = campgroundSchema.validate(req.body);
-    if (error) {
-        const msg = error.details.map(el => el.message).join(",");
-        throw new ExpressError(msg, 400);
-    } else {
-        next();
-    }
-}
 
 router.get('/', catchAsync(async (req, res) => {
     const campgrounds = await Campground.find({});
@@ -33,7 +21,7 @@ router.get('/new', isLoggedIn, (req, res) => {
     res.render('campground/new');
 })
 
-router.get('/:id/edit', isLoggedIn, catchAsync(async (req, res, next) => {
+router.get('/:id/edit', isLoggedIn, isUploader, catchAsync(async (req, res, next) => {
     const campground = await Campground.findById(req.params.id);
     if (!campground) {
         req.flash('error', 'There is no such Campground');
@@ -46,12 +34,13 @@ router.get('/:id/edit', isLoggedIn, catchAsync(async (req, res, next) => {
 
 router.post('/', isLoggedIn, validateCamp, catchAsync(async (req, res) => {
     const campground = await new Campground(req.body.campground);
+    campground.uploader = req.user._id;
     await campground.save();
     req.flash('success', 'Successfully made a new Camp');
     res.redirect('/campgrounds');
 }))
 
-router.put('/:id', isLoggedIn, validateCamp, catchAsync(async (req, res, next) => {
+router.put('/:id', isLoggedIn, validateCamp, isUploader, catchAsync(async (req, res, next) => {
     const {
         id
     } = req.params;
@@ -59,10 +48,10 @@ router.put('/:id', isLoggedIn, validateCamp, catchAsync(async (req, res, next) =
         ...req.body.campground
     });
     req.flash('info', 'Updated a Camp');
-    res.redirect(`/campgrounds/${id}`);
+    res.redirect(`/campgrounds/${campground.id}`);
 }))
 
-router.delete('/:id', isLoggedIn, catchAsync(async (req, res) => {
+router.delete('/:id', isLoggedIn, isUploader, catchAsync(async (req, res) => {
     const {
         id
     } = req.params;
@@ -72,7 +61,13 @@ router.delete('/:id', isLoggedIn, catchAsync(async (req, res) => {
 }))
 
 router.get('/:id', catchAsync(async (req, res, next) => {
-    const campground = await Campground.findById(req.params.id).populate('reviews');
+    const campground = await Campground.findById(req.params.id).populate({
+        path: 'reviews',
+        populate: {
+            path: 'uploader'
+        }
+    }).populate('uploader');
+    console.log(campground);
     if (!campground) {
         req.flash('error', 'There is no such Campground');
         res.redirect('/campgrounds');
