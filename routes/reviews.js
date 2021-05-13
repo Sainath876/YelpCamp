@@ -9,6 +9,7 @@ const {
     reviewSchema
 } = require('../schemas.js');
 const Review = require('../models/review');
+const review = require('../controllers/reviews');
 const {
     validateReview,
     isLoggedIn,
@@ -16,28 +17,8 @@ const {
 } = require('../middleware');
 
 
-router.post('/', validateReview, isLoggedIn, catchAsync(async (req, res) => {
-    const campground = await Campground.findById(req.params.id);
-    const review = await new Review(req.body.review);
-    review.uploader = req.user._id;
-    campground.reviews.push(review);
-    await review.save();
-    await campground.save();
-    res.redirect(`/campgrounds/${campground._id}`)
-}))
+router.post('/', validateReview, isLoggedIn, catchAsync(review.newReview))
 
-router.delete('/:reviewId', isLoggedIn, isReviewUploader, catchAsync(async (req, res) => {
-    const {
-        id,
-        reviewId
-    } = req.params;
-    await Campground.findByIdAndUpdate(id, {
-        $pull: {
-            reviews: reviewId
-        }
-    });
-    await Review.findByIdAndDelete(reviewId);
-    res.redirect(`/campgrounds/${id}`);
-}))
+router.delete('/:reviewId', isLoggedIn, isReviewUploader, catchAsync(review.deleteReview))
 
 module.exports = router;

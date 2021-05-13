@@ -13,12 +13,6 @@ const User = require('./models/newUser');
 const {
     urlencoded
 } = require('express');
-// const {
-//     campgroundSchema,
-//     reviewSchema
-// } = require('./schemas.js');
-// const Campground = require('./models/campground');
-// const Review = require('./models/review');
 
 
 mongoose.connect('mongodb://localhost:27017/yelpcamp', {
