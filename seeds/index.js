@@ -28,10 +28,13 @@ const seedDb = async () => {
         const camp = new Campground({
             location: `${seeds[random1000].city} ${seeds[random1000].state}`,
             title: `${sample(descriptors)} ${sample(places)}`,
-            image: 'https://source.unsplash.com/collection/483251/1600x900',
             description: 'Lorem ipsum, dolor sit amet consectetur adipisicing elit. Rem odit magnam explicabo, molestiae obcaecati iure eius quo nostrum dolores omnis id, minima nemo alias voluptatem voluptate tenetur inventore qui illo.',
             price: prices,
-            uploader: '609ccfe3bc9aab2a60ae609d'
+            uploader: '609ccfe3bc9aab2a60ae609d',
+            images: [{
+                url: 'https://res.cloudinary.com/yelpcamp-image/image/upload/v1621949969/YelpCamp/ztlzgayvnzp3ju2bxis9.png',
+                filename: 'YelpCamp/ztlzgayvnzp3ju2bxis9'
+            }]
         });
         await camp.save();
     }

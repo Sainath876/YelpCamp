@@ -9,11 +9,21 @@ const {
     validateCamp,
     isUploader
 } = require('../middleware');
+const {
+    storage
+} = require('../cloudinary');
+const multer = require('multer');
+const upload = multer({
+    storage
+})
 
 
 router.route('/')
     .get(catchAsync(campgrounds.campgroundIndex))
-    .post(isLoggedIn, validateCamp, catchAsync(campgrounds.postNewCamp))
+    .post(isLoggedIn, upload.array('image'), validateCamp, catchAsync(campgrounds.postNewCamp))
+// .post(upload.single('image'), (req, res) => {
+//     res.send('It somehow worked');
+// })
 
 router.get('/new', isLoggedIn, campgrounds.renderNewCamp)
 
@@ -21,7 +31,7 @@ router.get('/:id/edit', isLoggedIn, isUploader, catchAsync(campgrounds.editCamp)
 
 router.route('/:id')
     .get(catchAsync(campgrounds.showCamp))
-    .put(isLoggedIn, validateCamp, isUploader, catchAsync(campgrounds.updateCamp))
+    .put(isLoggedIn, isUploader, upload.array('image'), validateCamp, catchAsync(campgrounds.updateCamp))
     .delete(isLoggedIn, isUploader, catchAsync(campgrounds.deleteCamp))
 
 module.exports = router;
