@@ -2,7 +2,7 @@ console.log(campground.geometry.coordinates);
 mapboxgl.accessToken = accessToken;
 const map = new mapboxgl.Map({
     container: 'map',
-    style: 'mapbox://styles/mapbox/streets-v11',
+    style: 'mapbox://styles/mapbox/light-v10',
     center: campground.geometry.coordinates,
     zoom: 10
 })
