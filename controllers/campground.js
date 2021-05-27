@@ -42,10 +42,9 @@ module.exports.postNewCamp = async (req, res) => {
         filename: f.filename
     }))
     campground.uploader = req.user._id;
-    console.log(campground);
     await campground.save();
     req.flash('success', 'Successfully made a new Camp');
-    res.redirect('/campgrounds');
+    res.redirect(`/campgrounds/${campground._id}`);
 };
 
 module.exports.updateCamp = async (req, res, next) => {

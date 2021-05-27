@@ -1,3 +1,7 @@
+if (process.env.NODE_ENV !== "production") {
+    require('dotenv').config();
+}
+
 const mongoose = require('mongoose');
 const Campground = require('../models/campground');
 const seeds = require('./seeds');
@@ -6,7 +10,7 @@ const {
     descriptors
 } = require('./cities');
 
-mongoose.connect('mongodb://localhost:27017/yelpcamp', {
+mongoose.connect(process.env.DB_URL, {
     useNewUrlParser: true,
     useCreateIndex: true,
     useUnifiedTopology: true
@@ -22,9 +26,9 @@ const sample = array => array[Math.floor(Math.random() * array.length)];
 
 const seedDb = async () => {
     await Campground.deleteMany({});
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 100; i++) {
         let random1000 = Math.floor(Math.random() * 1000 + 1);
-        let prices = Math.floor(Math.random() * 20 + 10)
+        let prices = Math.floor(Math.random() * 20 + 10);
         const camp = new Campground({
             location: `${seeds[random1000].city} ${seeds[random1000].state}`,
             title: `${sample(descriptors)} ${sample(places)}`,
@@ -34,9 +38,9 @@ const seedDb = async () => {
                 type: "Point",
                 coordinates: [seeds[random1000].longitude, seeds[random1000].latitude]
             },
-            uploader: '609ccfe3bc9aab2a60ae609d',
+            uploader: '60af646a8f30fb44f45f708b',
             images: [{
-                url: 'https://res.cloudinary.com/yelpcamp-image/image/upload/v1621949969/YelpCamp/ztlzgayvnzp3ju2bxis9.png',
+                url: 'https://res.cloudinary.com/yelpcamp-image/image/upload/v1621949969/YelpCamp/giyz5wtjbo5bqdwuec7x.png',
                 filename: 'YelpCamp/ztlzgayvnzp3ju2bxis9'
             }]
         });

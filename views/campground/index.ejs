@@ -2,25 +2,24 @@
 <h1>Campgrounds</h1>
 <div id="cluster-map"></div>
 <div class="mt-3">
-    <ul class="mt-3">
+    <ul class="mt-3 ps-0">
         <% for(let campground of campgrounds) { %>
         <div class="card mb-3">
             <div class="row">
                 <div class="col-md-4">
                     <% if(campground.images.length) { %>
-                    <img class="img-fluid" src="<%= campground.images[0].url %>" alt="">
+                    <img id="css3" class="img-fluid" src="<%= campground.images[0].url %>" alt="">
                     <% } else { %>
-                    <img class="img-fluid"
+                    <img id="css3" class="img-fluid"
                         src="https://res.cloudinary.com/yelpcamp-image/image/upload/v1622025681/YelpCamp/bzkrtb7ek5hobg84yrku.png"
                         alt="">
                     <% } %>
-
                 </div>
-                <div class="col-md-8">
+                <div id="css1" class="col-md-8">
                     <div class="card-body">
-                        <h5 class="card-title"><%= campground.title %></h5>
+                        <h5 id="css4" class="card-title"><%= campground.title %></h5>
                         <p class="card-text"><%= campground.description %></p>
-                        <a href="/campgrounds/<%= campground._id %>" class="btn btn-primary">View
+                        <a href="/campgrounds/<%= campground._id %>" class="btn btn-sm btn-dark">View
                             <%= campground.location %> </a>
                         <p class="card-text text-muted mt-3"> &#x1f4cc; <%= campground.location %></p>
                     </div>
