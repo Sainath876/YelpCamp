@@ -19,9 +19,11 @@ const {
 } = require('express');
 const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
+const MongoStore = require("connect-mongo");
 
+const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelpcamp';
 
-mongoose.connect('mongodb://localhost:27017/yelpcamp', {
+mongoose.connect(dbUrl, {
     useNewUrlParser: true,
     useCreateIndex: true,
     useUnifiedTopology: true,
@@ -99,10 +101,24 @@ app.use(
     })
 );
 
+const secret = process.env.SECRET || 'Thisshouldbeasecret';
+
+const store = new MongoStore({
+    mongoUrl: dbUrl,
+    touchAfter: 24 * 60 * 60,
+    crypto: {
+        secret
+    }
+})
+
+store.on("error", function (e) {
+    console.log("Session Store Error", e);
+})
 
 const sessionConfig = {
+    store,
     name: 'session',
-    secret: 'Thisshouldbeasecret',
+    secret,
     resave: false,
     saveUninitialized: true,
     cookie: {
