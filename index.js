@@ -39,12 +39,9 @@ const userRoutes = require('./routes/user');
 const campgroundRoutes = require('./routes/campgrounds');
 const reviewRoutes = require('./routes/reviews');
 
+app.engine('ejs', ejsMate);
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
-
-
-app.engine('ejs', ejsMate);
-
 
 app.use(urlencoded({
     extended: true
@@ -54,6 +51,37 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(mongoSanitize({
     replaceWith: '_'
 }))
+
+const secret = process.env.SECRET || 'Thisshouldbeasecret';
+
+const store = new MongoStore({
+    mongoUrl: dbUrl,
+    touchAfter: 24 * 60 * 60,
+    crypto: {
+        secret
+    }
+})
+
+store.on("error", function (e) {
+    console.log("Session Store Error", e);
+})
+
+const sessionConfig = {
+    store,
+    name: 'session',
+    secret,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        httpOnly: true,
+        // secure: true,
+        expires: Date.now() + 60 * 60 * 24 * 7 * 100,
+        maxAge: 60 * 60 * 24 * 7 * 100
+    }
+}
+
+app.use(session(sessionConfig));
+app.use(flash());
 app.use(helmet());
 
 const scriptSrcUrls = [
@@ -101,37 +129,6 @@ app.use(
     })
 );
 
-const secret = process.env.SECRET || 'Thisshouldbeasecret';
-
-const store = new MongoStore({
-    mongoUrl: dbUrl,
-    touchAfter: 24 * 60 * 60,
-    crypto: {
-        secret
-    }
-})
-
-store.on("error", function (e) {
-    console.log("Session Store Error", e);
-})
-
-const sessionConfig = {
-    store,
-    name: 'session',
-    secret,
-    resave: false,
-    saveUninitialized: true,
-    cookie: {
-        httpOnly: true,
-        // secure: true,
-        expires: Date.now() + 60 * 60 * 24 * 7 * 100,
-        maxAge: 60 * 60 * 24 * 7 * 100
-    }
-}
-app.use(session(sessionConfig));
-app.use(flash());
-
-
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
@@ -141,11 +138,11 @@ passport.deserializeUser(User.deserializeUser());
 
 
 app.use((req, res, next) => {
+    res.locals.currentUser = req.user;
     res.locals.flashNew = req.flash('success');
     res.locals.flashDelete = req.flash('Danger');
     res.locals.flashUpdate = req.flash('info');
     res.locals.flashError = req.flash('error');
-    res.locals.currentUser = req.user;
     next();
 })
 
